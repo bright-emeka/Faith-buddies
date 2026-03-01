@@ -197,6 +197,142 @@
   background-color: #ffebee;
 }
 
+/* New Post Form */
+.new-post-form {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+}
+
+.new-post-input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.75rem;
+  resize: vertical;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.new-post-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.submit-post-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+.submit-post-btn:hover {
+  background-color: #2980b9;
+}
+
+.image-preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+/* Comment Section */
+.post-comments {
+  background: #fafafa;
+  border-top: 1px solid #ececec;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-body {
+  background: white;
+  border-radius: 8px;
+  padding: 0.5rem;
+  flex: 1;
+  position: relative;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.comment-date {
+  font-style: italic;
+  color: #999;
+}
+
+.comment-content {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.comment-delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.comment-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.comment-form button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.comment-form button:hover {
+  background-color: #2980b9;
+}
+
 /* Follow Button */
 .follow-btn {
   background-color: #3498db;
@@ -333,6 +469,54 @@
   display: flex;
   gap: 2rem;
   margin-bottom: 1.5rem;
+}
+
+.edit-profile-btn,
+.submit-btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s;
+}
+
+.edit-profile-btn:hover,
+.submit-btn:hover {
+  background-color: #2980b9;
+}
+
+.edit-form {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 600px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+}
+
+.edit-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.edit-form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+.edit-form input,
+.edit-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.edit-form textarea {
+  resize: vertical;
 }
 
 .stat {
