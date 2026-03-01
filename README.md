@@ -168,6 +168,66 @@ npm run web:start
 
 After `npm run web:start` the app will be available at `http://localhost:5000`.
 
+## Deployment
+
+This repo can be deployed as a single Node.js app that serves both the API
+and the built React frontend. A simple way is to use **Heroku**, but any
+Platform‑as‑a‑Service that supports Node.js will work (e.g. Vercel, Render,
+Fly.io, DigitalOcean App Platform).
+
+### Heroku
+
+1. Create a new Heroku app:
+
+   ```bash
+   heroku create bible-social-app
+   ```
+
+2. Provision a MongoDB or other backing store if needed (here we use Firebase
+   so no additional database is required).
+
+3. Set environment variables on Heroku:
+
+   ```bash
+   heroku config:set \
+     FIREBASE_PROJECT_ID=your_project_id \
+     FIREBASE_SERVICE_ACCOUNT_KEY="$(cat path/to/serviceAccount.json)" \
+     OPENAI_API_KEY=sk-... \
+     FRONTEND_URL=https://bible-social-app.herokuapp.com
+   ```
+
+4. Add a `Procfile` (see project root) with the following line:
+
+   ```text
+   web: npm run web:serve
+   ```
+
+5. Push to Heroku (main branch will automatically build the project using the
+   `heroku-postbuild` script and start the server):
+
+   ```bash
+   git push heroku main
+   ```
+
+6. Open the app:
+
+   ```bash
+   heroku open
+   ```
+
+### Vercel / Netlify / Render
+
+- **Frontend only**: Deploy the `frontend` directory as a React app and set
+  `REACT_APP_API_URL` to the URL of your API server.
+- **Backend only**: Deploy `backend` as a Node service; make sure to build the
+  frontend separately or serve it from the backend.
+
+### Local Docker (optional)
+
+A Dockerfile can bundle both services; you would then push the image to a
+registry.
+
+
 ## Usage
 
 1. **Register**: Click "Sign Up" and create an account with email and name
