@@ -1,12 +1,16 @@
 // Post component - displays individual post with interactions
 import React, { useState, useEffect } from 'react';
-import { toggleLike, checkLiked, toggleFollow, checkFollowing } from '../services/api';
+import { toggleLike, checkLiked, toggleFollow, checkFollowing, getComments, addComment, deleteComment } from '../services/api';
 import { auth } from '../services/firebase';
 
 const Post = ({ post, onDelete }) => {
   const [liked, setLiked] = useState(false);
   const [following, setFollowing] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentInput, setCommentInput] = useState('');
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [localCommentsCount, setLocalCommentsCount] = useState(post.commentsCount || 0);
 
   const currentUser = auth.currentUser;
 
@@ -46,6 +50,30 @@ const Post = ({ post, onDelete }) => {
     }
   };
 
+  const loadComments = async () => {
+    setCommentsLoading(true);
+    try {
+      const data = await getComments(post.id);
+      setComments(data);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!commentInput.trim()) return;
+    try {
+      const newC = await addComment(post.id, commentInput);
+      setComments((prev) => [newC, ...prev]);
+      setCommentInput('');
+      setLocalCommentsCount((c) => c + 1);
+    if (!window.confirm('Delete this comment?')) return;
+    try {
+      await deleteComment(post.id, commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setLocalCommentsCount((c) => Math.max(0, c - 1));
   return (
     <div className="post-card">
       <div className="post-header">
@@ -69,14 +97,18 @@ const Post = ({ post, onDelete }) => {
 
       <div className="post-stats">
         <span>{post.likesCount || 0} likes</span>
-        <span>{post.commentsCount || 0} comments</span>
+        <span>{localCommentsCount} comments</span>
       </div>
 
       <div className="post-actions">
         <button className={`action-btn ${liked ? 'liked' : ''}`} onClick={handleLike}>
           ❤️ Like
         </button>
-        <button className="action-btn" onClick={() => setShowComments(!showComments)}>
+        <button className="action-btn" onClick={() => {
+            setShowComments((s) => !s);
+            if (!showComments) loadComments();
+          }}
+        >
           💬 Comment
         </button>
         <button className="action-btn">↗️ Share</button>
@@ -87,7 +119,54 @@ const Post = ({ post, onDelete }) => {
         )}
       </div>
 
-      {showComments && <div className="post-comments">Comments will load here</div>}
+      {showComments && (
+        <div className="post-comments">
+          {commentsLoading && <p>Loading comments...</p>}
+          {!commentsLoading && (
+            <>
+              <div className="comments-list">
+                {comments.length === 0 && <p>No comments yet</p>}
+                {comments.map((c) => (
+                  <div key={c.id} className="comment">
+                    <img src={c.author?.avatar} alt="avatar" className="comment-avatar" />
+                    <div className="comment-body">
+                      <div className="comment-header">
+                        <strong>{c.author?.name || 'User'}</strong>
+                        <span className="comment-date">
+                          {new Date(c.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="comment-content">{c.content}</p>
+                      {currentUser && currentUser.uid === c.userId && (
+                        <button
+                          className="comment-delete-btn"
+                          onClick={() => handleDeleteComment(c.id)}
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {currentUser && (
+                <div className="comment-form">
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentInput}
+                    onChange={(e) => setCommentInput(e.target.value)}
+                  />
+                  <button onClick={handleAddComment} disabled={!commentInput.trim()}>
+                    Post
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 // Profile page - displays user profile and their posts
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUserProfile, getUserPosts, getFollowers, getFollowing, toggleFollow, checkFollowing } from '../services/api';
+import { getUserProfile, getUserPosts, getFollowers, getFollowing, toggleFollow, checkFollowing, updateUserProfile } from '../services/api';
 import { auth } from '../services/firebase';
 import Post from '../components/Post';
 
@@ -14,6 +14,10 @@ const Profile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
 
   const currentUser = auth.currentUser;
   const isOwnProfile = currentUser && currentUser.uid === userId;
@@ -28,6 +32,11 @@ const Profile = () => {
 
       const userData = await getUserProfile(userId);
       setUser(userData);
+      if (isOwnProfile) {
+        setEditName(userData.name || '');
+        setEditBio(userData.bio || '');
+        setEditAvatar(userData.avatar || '');
+      }
 
       const userPosts = await getUserPosts(userId);
       setPosts(userPosts);
@@ -61,6 +70,21 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Error toggling follow:', error);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const updated = await updateUserProfile(userId, {
+        name: editName,
+        bio: editBio,
+        avatar: editAvatar,
+      });
+      setUser(updated);
+      setEditing(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile');
     }
   };
 
@@ -101,9 +125,34 @@ const Profile = () => {
               {isFollowing ? 'Following' : 'Follow'}
             </button>
           )}
+          {isOwnProfile && (
+            <button
+              className="edit-profile-btn"
+              onClick={() => setEditing((e) => !e)}
+            >
+              {editing ? 'Cancel' : 'Edit Profile'}
+            </button>
+          )}
         </div>
       </div>
 
+      {isOwnProfile && editing && (
+        <div className="edit-form">
+          <div className="form-group">
+            <label>Name</label>
+            <input value={editName} onChange={(e) => setEditName(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Bio</label>
+            <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Avatar URL</label>
+            <input value={editAvatar} onChange={(e) => setEditAvatar(e.target.value)} />
+          </div>
+          <button className="submit-btn" onClick={handleSaveProfile}>Save</button>
+        </div>
+      )}
       <div className="profile-tabs">
         <button
           className={`tab ${activeTab === 'posts' ? 'active' : ''}`}

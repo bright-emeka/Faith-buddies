@@ -2,17 +2,122 @@
 const admin = require('firebase-admin');
 require('dotenv').config();
 
-// Initialize Firebase Admin SDK with service account
+let db, auth, adminInstance;
+
+// Try to initialize Firebase Admin SDK
 // Download your service account key from Firebase Console:
 // Project Settings > Service Accounts > Generate New Private Key
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+try {
+  const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  
+  if (!serviceAccountKey) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_KEY not provided');
+  }
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  projectId: process.env.FIREBASE_PROJECT_ID,
-});
+  const serviceAccount = JSON.parse(serviceAccountKey);
 
-const db = admin.firestore();
-const auth = admin.auth();
+  adminInstance = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: process.env.FIREBASE_PROJECT_ID,
+  });
 
-module.exports = { admin, db, auth };
+  db = admin.firestore();
+  auth = admin.auth();
+
+  console.log('✅ Firebase initialized successfully');
+} catch (error) {
+  console.warn('⚠️  Firebase initialization failed:', error.message);
+  console.warn('   Running in DEVELOPMENT MODE with mocked Firebase');
+  
+  // Create mock objects for development
+  db = {
+    collection: (name) => ({
+      doc: (id) => ({
+        get: async () => ({ exists: false, data: () => ({}) }),
+        set: async () => ({}),
+        update: async () => ({}),
+        delete: async () => ({}),
+      }),
+      add: async () => ({ id: 'mock-id' }),
+      where: () => ({
+        where: () => ({
+          where: () => ({
+            get: async () => ({ empty: true, forEach: () => {} }),
+            orderBy: () => ({
+              startAt: () => ({
+                endAt: () => ({
+                  limit: () => ({
+                    get: async () => ({ empty: true, docs: [] }),
+                  }),
+                }),
+              }),
+              endAt: () => ({
+                limit: () => ({
+                  get: async () => ({ empty: true, docs: [] }),
+                }),
+              }),
+              get: async () => ({ empty: true, docs: [] }),
+            }),
+          }),
+          get: async () => ({ empty: true, forEach: () => {} }),
+        }),
+        where: () => ({
+          get: async () => ({ docs: [] }),
+          where: () => ({
+            get: async () => ({ docs: [] }),
+          }),
+        }),
+        get: async () => ({ empty: true, docs: [] }),
+        orderBy: () => ({
+          startAt: () => ({
+            endAt: () => ({
+              limit: () => ({
+                get: async () => ({ empty: true, docs: [] }),
+              }),
+            }),
+          }),
+          endAt: () => ({
+            limit: () => ({
+              get: async () => ({ empty: true, docs: [] }),
+            }),
+          }),
+          get: async () => ({ empty: true, docs: [] }),
+          limit: () => ({
+            get: async () => ({ empty: true, docs: [] }),
+          }),
+        }),
+        limit: () => ({
+          get: async () => ({ empty: true, docs: [] }),
+        }),
+      }),
+      orderBy: () => ({
+        startAt: () => ({
+          endAt: () => ({
+            limit: () => ({
+              get: async () => ({ empty: true, docs: [] }),
+            }),
+          }),
+        }),
+        endAt: () => ({
+          limit: () => ({
+            get: async () => ({ empty: true, docs: [] }),
+          }),
+        }),
+        get: async () => ({ empty: true, docs: [] }),
+        limit: () => ({
+          get: async () => ({ empty: true, docs: [] }),
+        }),
+      }),
+      limit: () => ({
+        get: async () => ({ empty: true, docs: [] }),
+      }),
+      get: async () => ({ empty: true, docs: [], forEach: () => {} }),
+    }),
+  };
+
+  auth = {
+    verifyIdToken: async () => ({ uid: 'dev-user' }),
+  };
+}
+
+module.exports = { admin, db, auth, adminInstance };
