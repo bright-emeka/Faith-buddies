@@ -1,14 +1,14 @@
 // Main App component - handles routing and auth state
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { onAuthChange } from './services/auth';
-import { setAuthToken, createUserProfile } from './services/api';
-import Login from './pages/Login';
-import Chat from './pages/Chat';
-import Feed from './pages/Feed';
-import Profile from './pages/Profile';
-import Discover from './pages/Discover';
-import Header from './components/Header';
+import { onAuthChange } from './services/auth.jsx';
+import { setAuthToken, createUserProfile } from './services/api.jsx';
+import Login from './pages/Login.jsx';
+import Chat from './pages/Chat.jsx';
+import Feed from './pages/Feed.jsx';
+import Profile from './pages/Profile.jsx';
+import Discover from './pages/Discover.jsx';
+import Header from './components/Header.jsx';
 
 function AppContent() {
   const [user, setUser] = useState(null);
