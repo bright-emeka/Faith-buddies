@@ -1,7 +1,7 @@
 // Profile page - displays user profile and their posts
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUserProfile, getUserPosts, getFollowers, getFollowing, toggleFollow, checkFollowing } from '../services/api';
+import { getUserProfile, getUserPosts, getFollowers, getFollowing, toggleFollow, checkFollowing, updateUserProfile } from '../services/api';
 import { auth } from '../services/firebase';
 import Post from '../components/Post';
 
@@ -14,6 +14,8 @@ const Profile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', bio: '', avatar: '', religion: '' });
 
   const currentUser = auth.currentUser;
   const isOwnProfile = currentUser && currentUser.uid === userId;
@@ -64,6 +66,30 @@ const Profile = () => {
     }
   };
 
+  const handleEdit = () => {
+    setEditForm({
+      name: user.name,
+      bio: user.bio,
+      avatar: user.avatar,
+      religion: user.religion || 'Christian',
+    });
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await updateUserProfile(userId, editForm);
+      setUser({ ...user, ...editForm });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
   if (loading) {
     return <div className="loading">Loading profile...</div>;
   }
@@ -77,28 +103,82 @@ const Profile = () => {
       <div className="profile-header">
         <img src={user.avatar} alt={user.name} className="profile-avatar" />
         <div className="profile-info">
-          <h1>{user.name}</h1>
-          <p className="profile-bio">{user.bio}</p>
-          <div className="profile-stats">
-            <div className="stat">
-              <span className="stat-number">{user.postsCount || 0}</span>
-              <span className="stat-label">Posts</span>
+          {isEditing ? (
+            <div className="edit-form">
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Bio</label>
+                <textarea
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Avatar URL</label>
+                <input
+                  type="text"
+                  value={editForm.avatar}
+                  onChange={(e) => setEditForm({ ...editForm, avatar: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Religion</label>
+                <select
+                  value={editForm.religion}
+                  onChange={(e) => setEditForm({ ...editForm, religion: e.target.value })}
+                >
+                  <option value="Christian">Christian</option>
+                  <option value="Muslim">Muslim</option>
+                  <option value="Jewish">Jewish</option>
+                  <option value="Hindu">Hindu</option>
+                  <option value="Buddhist">Buddhist</option>
+                  <option value="Sikh">Sikh</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="edit-actions">
+                <button onClick={handleSaveEdit}>Save</button>
+                <button onClick={handleCancelEdit}>Cancel</button>
+              </div>
             </div>
-            <div className="stat">
-              <span className="stat-number">{user.followersCount || 0}</span>
-              <span className="stat-label">Followers</span>
-            </div>
-            <div className="stat">
-              <span className="stat-number">{user.followingCount || 0}</span>
-              <span className="stat-label">Following</span>
-            </div>
-          </div>
+          ) : (
+            <>
+              <h1>{user.name}</h1>
+              <p className="profile-bio">{user.bio}</p>
+              <div className="profile-stats">
+                <div className="stat">
+                  <span className="stat-number">{user.postsCount || 0}</span>
+                  <span className="stat-label">Posts</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">{user.followersCount || 0}</span>
+                  <span className="stat-label">Followers</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">{user.followingCount || 0}</span>
+                  <span className="stat-label">Following</span>
+                </div>
+              </div>
+            </>
+          )}
           {!isOwnProfile && (
             <button
               className={`follow-btn ${isFollowing ? 'following' : ''}`}
               onClick={handleFollow}
             >
               {isFollowing ? 'Following' : 'Follow'}
+            </button>
+          )}
+          {isOwnProfile && !isEditing && (
+            <button className="edit-profile-btn" onClick={handleEdit}>
+              Edit Profile
             </button>
           )}
         </div>

@@ -7,6 +7,7 @@ const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [religion, setReligion] = useState('Christian');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ const Login = ({ onLoginSuccess }) => {
           setLoading(false);
           return;
         }
-        await signUp(email, password, name);
+        await signUp(email, password, name, religion);
       } else {
         await signIn(email, password);
       }
@@ -39,7 +40,7 @@ const Login = ({ onLoginSuccess }) => {
     <div className="login-container">
       <div className="login-card">
         <h1>Faith Buddies</h1>
-        <p className="subtitle">AI-Powered Bible Chat</p>
+        <p className="subtitle">AI-Powered Faith Chat</p>
 
         <form onSubmit={handleSubmit}>
           {isSignUp && (
@@ -53,6 +54,26 @@ const Login = ({ onLoginSuccess }) => {
                 placeholder="Enter your name"
                 required={isSignUp}
               />
+            </div>
+          )}
+
+          {isSignUp && (
+            <div className="form-group">
+              <label htmlFor="religion">Religion</label>
+              <select
+                id="religion"
+                value={religion}
+                onChange={(e) => setReligion(e.target.value)}
+                required={isSignUp}
+              >
+                <option value="Christian">Christian</option>
+                <option value="Muslim">Muslim</option>
+                <option value="Jewish">Jewish</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Buddhist">Buddhist</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
           )}
 

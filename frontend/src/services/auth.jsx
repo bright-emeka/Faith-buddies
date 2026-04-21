@@ -9,7 +9,7 @@ import { auth, db } from './firebase';
 import { setDoc, doc } from 'firebase/firestore';
 
 // Sign up with email and password
-export const signUp = async (email, password, name) => {
+export const signUp = async (email, password, name, religion) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
@@ -19,6 +19,7 @@ export const signUp = async (email, password, name) => {
       id: user.uid,
       name: name,
       email: email,
+      religion: religion || 'Christian',
       createdAt: new Date().toISOString(),
     });
 

@@ -90,8 +90,8 @@ const Chat = ({ userName }) => {
       <div className="chat-messages">
         {messages.length === 0 && (
           <div className="empty-chat">
-            <h2>Welcome to Bible Chat</h2>
-            <p>Ask me anything about the Bible. I'll answer from Scripture.</p>
+            <h2>Welcome to Faith Friend</h2>
+            <p>Ask me anything about your faith. I'll answer from sacred scriptures.</p>
           </div>
         )}
 
@@ -116,7 +116,7 @@ const Chat = ({ userName }) => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about the Bible..."
+          placeholder="Ask about your faith..."
           disabled={loading}
           className="chat-input"
         />

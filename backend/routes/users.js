@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/profile', verifyToken, async (req, res) => {
   try {
     const { userId } = req;
-    const { name, email, bio, avatar } = req.body;
+    const { name, email, bio, avatar, religion } = req.body;
 
     const userRef = db.collection('users').doc(userId);
     const userDoc = await userRef.get();
@@ -20,8 +20,9 @@ router.post('/profile', verifyToken, async (req, res) => {
         uid: userId,
         name: name || email?.split('@')[0] || 'User',
         email,
-        bio: bio || 'Christian believer sharing faith and Scripture',
+        bio: bio || 'Faithful believer sharing wisdom and inspiration',
         avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || email)}&background=random`,
+        religion: religion || 'Christian',
         createdAt: new Date().toISOString(),
         followersCount: 0,
         followingCount: 0,
@@ -64,13 +65,14 @@ router.put('/:userId', verifyToken, async (req, res) => {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    const { name, bio, avatar } = req.body;
+    const { name, bio, avatar, religion } = req.body;
     const userRef = db.collection('users').doc(paramUserId);
 
     await userRef.update({
       ...(name && { name }),
       ...(bio && { bio }),
       ...(avatar && { avatar }),
+      ...(religion && { religion }),
       updatedAt: new Date().toISOString(),
     });
 
