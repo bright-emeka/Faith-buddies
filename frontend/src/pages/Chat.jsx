@@ -1,15 +1,15 @@
-// Chat page component - AI Bible Chat interface
 import React, { useState, useEffect, useRef } from 'react';
 import { sendMessage, getChatHistory, setAuthToken } from '../services/api';
 import { auth } from '../services/firebase';
 
-const Chat = ({ userName }) => {
+// Removed userName from the props if you aren't using it inside the component
+// Changed catch(error) to catch(err) and added a console.log to clear the error
+const Chat = ({ onBack }) => { 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Initialize auth token and load chat history on component mount
   useEffect(() => {
     const initChat = async () => {
       try {
@@ -17,40 +17,32 @@ const Chat = ({ userName }) => {
         if (user) {
           const token = await user.getIdToken();
           setAuthToken(token);
-
-          // Load chat history
           const history = await getChatHistory(user.uid);
           setMessages(history.messages || []);
         }
-      } catch (error) {
-        console.error('Error initializing chat:', error);
+      } catch (err) {
+        // Logging 'err' prevents the "defined but never used" error
+        console.error('Initialization error:', err);
       }
     };
-
     initChat();
   }, []);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-
     if (!input.trim() || loading) return;
 
     const user = auth.currentUser;
-    if (!user) {
-      alert('User not authenticated');
-      return;
-    }
+    if (!user) return;
 
-    // Add user message to UI immediately
-    const userMessage = {
-      role: 'user',
-      content: input,
-      timestamp: new Date().toISOString(),
+    const userMessage = { 
+      role: 'user', 
+      content: input, 
+      timestamp: new Date().toISOString() 
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -58,27 +50,23 @@ const Chat = ({ userName }) => {
     setLoading(true);
 
     try {
-      // Send message to backend
       const response = await sendMessage(input, user.uid);
-
-      // Add AI response to UI
-      const aiMessage = {
-        role: 'assistant',
-        content: response.message,
-        timestamp: new Date().toISOString(),
+      const aiMessage = { 
+        role: 'assistant', 
+        content: response.message, 
+        timestamp: new Date().toISOString() 
       };
-
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      // Add error message
+    } catch (err) {
+      // Logging 'err' here as well to satisfy the linter
+      console.error('Message error:', err);
       setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
-          timestamp: new Date().toISOString(),
-        },
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Sorry, I hit a snag. Please try again.', 
+          timestamp: new Date().toISOString() 
+        }
       ]);
     } finally {
       setLoading(false);
@@ -86,42 +74,39 @@ const Chat = ({ userName }) => {
   };
 
   return (
-    <div className="chat-container">
-      <div className="chat-messages">
-        {messages.length === 0 && (
-          <div className="empty-chat">
-            <h2>Welcome to Faith Friend</h2>
-            <p>Ask me anything about your faith. I'll answer from sacred scriptures.</p>
-          </div>
-        )}
+    <div className="chat-interface-wrapper">
+      <div className="chat-active-header">
+        {/* The onBack here links to setSelectedChatId(null) in ChatHub */}
+        <button onClick={onBack} className="back-arrow" type="button">←</button>
+        <div className="header-user-info">
+          <img 
+            src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" 
+            alt="AI" 
+            className="small-avatar" 
+          />
+          <span>AI BUDDY</span>
+        </div>
+      </div>
 
+      <div className="chat-messages">
         {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`message ${msg.role === 'user' ? 'user-message' : 'ai-message'}`}
-          >
-            <div className="message-badge">
-              {msg.role === 'user' ? '👤' : '📖'}
-            </div>
-            <div className="message-content">
-              <p>{msg.content}</p>
-            </div>
+          <div key={index} className={`message-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
+             <div className="text-content">{msg.content}</div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <form className="chat-input-form" onSubmit={handleSendMessage}>
+      <form className="chat-input-area" onSubmit={handleSendMessage}>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about your faith..."
+          placeholder="Type a message..."
           disabled={loading}
-          className="chat-input"
         />
-        <button type="submit" disabled={loading} className="send-btn">
-          {loading ? 'Sending...' : 'Send'}
+        <button type="submit" className="send-icon-btn" disabled={loading || !input.trim()}>
+          {loading ? '...' : 'Send'}
         </button>
       </form>
     </div>

@@ -3,6 +3,70 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* Container for the chat area */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  background-color: #ffffff;
+  overflow-y: auto;
+  height: calc(100vh - 180px); /* Adjust based on your header height */
+}
+
+/* The actual bubbles */
+.message-bubble {
+  max-width: 75%;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* AI Buddy Bubbles (Grey) */
+.message-bubble.ai {
+  align-self: flex-start;
+  background-color: #e4e6eb;
+  color: #050505;
+  border-bottom-left-radius: 4px;
+}
+
+/* Your Bubbles (Blue) */
+.message-bubble.user {
+  align-self: flex-end;
+  background-color: #0084ff;
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+/* Input Area at the bottom */
+.chat-input-area {
+  display: flex;
+  padding: 10px 15px;
+  border-top: 1px solid #ddd;
+  background: white;
+  align-items: center;
+}
+
+.chat-input-area input {
+  flex: 1;
+  background: #f0f2f5;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px;
+  outline: none;
+}
+
+.send-icon-btn {
+  background: none;
+  border: none;
+  color: #0084ff;
+  font-weight: bold;
+  margin-left: 10px;
+  cursor: pointer;
+}
 /* Container for the whole list */
 .chat-list-container {
   display: flex;
