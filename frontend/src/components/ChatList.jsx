@@ -16,7 +16,7 @@ const ChatList = ({ chats = [], onSelectChat = () => {} }) => {
     {
       id: '1',
       name: 'Mary Johnson',
-      lastMessage: 'I loved your last post about faith.',
+      lastMessage: 'I loved your last post about Faith Buddies.',
       time: '9:42 AM',
       unread: true,
       avatarUrl: '',
@@ -24,7 +24,7 @@ const ChatList = ({ chats = [], onSelectChat = () => {} }) => {
     {
       id: '2',
       name: 'David Smith',
-      lastMessage: 'Ready for Bible study tonight?',
+      lastMessage: 'Ready for Study sesh tonight?',
       time: 'Yesterday',
       unread: false,
       avatarUrl: '',
