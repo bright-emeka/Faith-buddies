@@ -141,7 +141,16 @@ router.post('/message', verifyToken, async (req, res) => {
       { role: 'user', content: message },
     ];
 
+    // Validate OpenAI API key exists
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('❌ OPENAI_API_KEY is not set in environment variables');
+      return res.status(500).json({ 
+        error: 'OpenAI API key not configured. Please check server environment variables.' 
+      });
+    }
+
     // Call OpenAI Chat Completion API
+    console.log('📡 Sending request to OpenAI API...');
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -158,6 +167,7 @@ router.post('/message', verifyToken, async (req, res) => {
       }
     );
 
+    console.log('✅ Received response from OpenAI');
     const aiMessage = response.data.choices[0].message.content;
 
     // Save messages to Firestore
@@ -188,10 +198,26 @@ router.post('/message', verifyToken, async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error processing message:', error);
+    console.error('❌ Error processing message:', error);
+    
+    // Log specific error information for debugging
+    if (error.response) {
+      console.error('   Status:', error.response.status);
+      console.error('   Data:', error.response.data);
+    } else if (error.request) {
+      console.error('   No response from server. Request details:', error.request);
+    } else {
+      console.error('   Error:', error.message);
+    }
 
     if (error.response?.status === 401) {
-      return res.status(401).json({ error: 'OpenAI API key is invalid' });
+      console.error('🔑 Authentication failed - Invalid OpenAI API key');
+      return res.status(401).json({ error: 'OpenAI API key is invalid or expired' });
+    }
+
+    if (error.response?.status === 429) {
+      console.error('⏱️  Rate limited by OpenAI');
+      return res.status(429).json({ error: 'OpenAI API rate limit exceeded. Please try again later.' });
     }
 
     res.status(500).json({

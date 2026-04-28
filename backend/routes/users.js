@@ -38,6 +38,33 @@ router.post('/profile', verifyToken, async (req, res) => {
   }
 });
 
+// Search users - MUST be before /:userId route to prevent 'search' being treated as a userId
+router.get('/search/:query', async (req, res) => {
+  try {
+    const { query } = req.params;
+    const q = query.toLowerCase();
+
+    // Firestore doesn't have great full-text search, so we do prefix search
+    const snapshot = await db
+      .collection('users')
+      .orderBy('name')
+      .startAt(query)
+      .endAt(query + '\uf8ff')
+      .limit(20)
+      .get();
+
+    const users = [];
+    snapshot.forEach((doc) => {
+      users.push(doc.data());
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(500).json({ error: 'Failed to search users' });
+  }
+});
+
 // Get user profile by ID
 router.get('/:userId', async (req, res) => {
   try {
@@ -81,33 +108,6 @@ router.put('/:userId', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Error updating user profile:', error);
     res.status(500).json({ error: 'Failed to update user profile' });
-  }
-});
-
-// Search users
-router.get('/search/:query', async (req, res) => {
-  try {
-    const { query } = req.params;
-    const q = query.toLowerCase();
-
-    // Firestore doesn't have great full-text search, so we do prefix search
-    const snapshot = await db
-      .collection('users')
-      .orderBy('name')
-      .startAt(query)
-      .endAt(query + '\uf8ff')
-      .limit(20)
-      .get();
-
-    const users = [];
-    snapshot.forEach((doc) => {
-      users.push(doc.data());
-    });
-
-    res.json(users);
-  } catch (error) {
-    console.error('Error searching users:', error);
-    res.status(500).json({ error: 'Failed to search users' });
   }
 });
 
