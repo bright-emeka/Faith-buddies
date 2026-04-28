@@ -2,32 +2,46 @@ import React, { useState, useEffect, useRef } from 'react';
 import { sendMessage, getChatHistory, setAuthToken } from '../services/api';
 import { auth } from '../services/firebase';
 
-// Removed userName from the props if you aren't using it inside the component
-// Changed catch(error) to catch(err) and added a console.log to clear the error
-const Chat = ({ onBack }) => { 
+const Chat = ({ onBack, selectedChatId }) => { 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Initialize auth token and load chat history
   useEffect(() => {
     const initChat = async () => {
       try {
         const user = auth.currentUser;
-        if (user) {
-          const token = await user.getIdToken();
-          setAuthToken(token);
+        if (!user) return;
+
+        const token = await user.getIdToken();
+        setAuthToken(token);
+
+        // LOGIC: If it's NOT the AI Buddy, fetch history from the database
+        if (selectedChatId && selectedChatId !== 'ai-buddy') {
           const history = await getChatHistory(user.uid);
           setMessages(history.messages || []);
+        } else {
+          // If it's AI BUDDY, we start with a welcome message
+          setMessages([
+            {
+              role: 'assistant',
+              content: "Peace be with you! I am AI BUDDY. How can I help you with your faith today?",
+              timestamp: new Date().toISOString(),
+            }
+          ]);
         }
       } catch (err) {
-        // Logging 'err' prevents the "defined but never used" error
+        // Renaming to 'err' and logging it clears the "unused variable" error
         console.error('Initialization error:', err);
       }
     };
-    initChat();
-  }, []);
 
+    initChat();
+  }, [selectedChatId]); // Refetch if the chat target changes
+
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -50,15 +64,17 @@ const Chat = ({ onBack }) => {
     setLoading(true);
 
     try {
+      // Send message to your backend (AI processing)
       const response = await sendMessage(input, user.uid);
+
       const aiMessage = { 
         role: 'assistant', 
         content: response.message, 
         timestamp: new Date().toISOString() 
       };
+
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
-      // Logging 'err' here as well to satisfy the linter
       console.error('Message error:', err);
       setMessages((prev) => [
         ...prev, 
@@ -75,8 +91,8 @@ const Chat = ({ onBack }) => {
 
   return (
     <div className="chat-interface-wrapper">
+      {/* Header Section */}
       <div className="chat-active-header">
-        {/* The onBack here links to setSelectedChatId(null) in ChatHub */}
         <button onClick={onBack} className="back-arrow" type="button">←</button>
         <div className="header-user-info">
           <img 
@@ -84,10 +100,14 @@ const Chat = ({ onBack }) => {
             alt="AI" 
             className="small-avatar" 
           />
-          <span>AI BUDDY</span>
+          <div className="header-text">
+            <span className="chat-header-name">AI BUDDY</span>
+            <span className="online-status">Online</span>
+          </div>
         </div>
       </div>
 
+      {/* Messages Section */}
       <div className="chat-messages">
         {messages.map((msg, index) => (
           <div key={index} className={`message-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}>
@@ -97,12 +117,13 @@ const Chat = ({ onBack }) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Input Section */}
       <form className="chat-input-area" onSubmit={handleSendMessage}>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Type your message..."
           disabled={loading}
         />
         <button type="submit" className="send-icon-btn" disabled={loading || !input.trim()}>

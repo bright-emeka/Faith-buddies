@@ -83,6 +83,7 @@ function AppContent() {
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/discover" element={<Discover onUserClick={handleUserClick} />} />
               <Route path="/" element={<Feed />} />
+              <Route path="/chat" element={<ChatHub />} />
             </Routes>
           </main>
         </>

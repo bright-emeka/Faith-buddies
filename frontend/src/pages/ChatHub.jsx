@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import ChatList from '../components/ChatList';
 import Chat from './Chat';
 
-const ChatHub = ({ userEmail }) => {
+// Removed the email prop entirely if the Hub doesn't need it
+const ChatHub = () => { 
   const [selectedChatId, setSelectedChatId] = useState(null);
 
-  // If no chat is selected, show the Messenger list
   if (!selectedChatId) {
     return (
       <div className="chat-hub-container">
@@ -17,10 +17,9 @@ const ChatHub = ({ userEmail }) => {
     );
   }
 
-  // If AI BUDDY (or any ID) is selected, show the actual Chat interface
   return (
     <Chat 
-      userName={userEmail} 
+      selectedChatId={selectedChatId} 
       onBack={() => setSelectedChatId(null)} 
     />
   );
