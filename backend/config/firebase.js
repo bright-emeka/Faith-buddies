@@ -1,4 +1,4 @@
-// Firebase Admin configuration
+
 import admin from 'firebase-admin';
 import dotenv from 'dotenv';
 
@@ -6,9 +6,7 @@ dotenv.config();
 
 let db, auth, adminInstance;
 
-// Try to initialize Firebase Admin SDK
-// Download your service account key from Firebase Console:
-// Project Settings > Service Accounts > Generate New Private Key
+
 try {
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   

@@ -9,7 +9,7 @@ const ChatList = ({ chats = [], onSelectChat = () => {} }) => {
     time: 'Now',
     unread: false,
     isAI: true,
-    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png', // Robot Icon
+    avatarUrl: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png', 
   };
 
   const sampleChats = [
@@ -27,8 +27,18 @@ const ChatList = ({ chats = [], onSelectChat = () => {} }) => {
       lastMessage: 'Ready for Study sesh tonight?',
       time: 'Yesterday',
       unread: false,
+      avatarUrl: 'https://media.licdn.com/dms/image/v2/D4D35AQHYcSUKD25rlg/profile-framedphoto-shrink_400_400/B4DZ2Qvh.kIEAc-/0/1776249872772?e=1778234400&v=beta&t=dqlS_qfF7OyhBCegIzMKZBZJLfXEPi3Jjwa2B_ZSs0I',
+    },
+     {
+      id: '3',
+      name: 'Mary micheal',
+      lastMessage: 'I loved your last post about Faith Buddies.',
+      time: '9:42 AM',
+      unread: true,
       avatarUrl: '',
-    }
+    },
+
+   
   ];
 
   // 2. Combine and filter to ensure AI is at index 0 and not duplicated
