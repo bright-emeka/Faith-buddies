@@ -149,7 +149,6 @@ router.get('/:postId/comments', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch comments' });
   }
 });
-});
 
 // Delete comment
 router.delete('/:postId/comments/:commentId', verifyToken, async (req, res) => {
