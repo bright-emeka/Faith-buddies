@@ -32,6 +32,11 @@ jobs:
           npm install
           npm run build
 
+      - name: Install Heroku CLI
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
+      
+
   deploy:
     name: Deploy to Heroku
     runs-on: ubuntu-latest
