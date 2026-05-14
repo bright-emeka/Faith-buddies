@@ -42,27 +42,34 @@ app.get('/health', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
 });
 
-// --- SERVE FRONTEND 
-const rootDir = process.cwd();
+// --- SERVE FRONTEND (Monorepo Fix) ---
+const currentDir = process.cwd();
+
+// Detect root directory based on where the process was started
+// If started from root (Render), currentDir is the root.
+// If started from inside backend, go up one level.
+const rootDir = currentDir.endsWith('backend') 
+  ? path.join(currentDir, '..') 
+  : currentDir;
+
 const frontendPath = path.join(rootDir, 'frontend');
-const distPath = path.join(frontendPath, 'dist'); // Path for Vite
-const buildPath = path.join(frontendPath, 'build'); // Path for CRA
+const distPath = path.join(frontendPath, 'dist'); 
 
+if (fs.existsSync(distPath)) {
+  console.log(`✅ Production Build Found: ${distPath}`);
+  app.use(express.static(distPath));
 
-const staticPath = fs.existsSync(distPath) ? distPath : buildPath;
-
-if (fs.existsSync(staticPath)) {
-  console.log(`✅ Production Build Found: ${staticPath}`);
-  app.use(express.static(staticPath));
-
-
+  // Catch-all route to serve the React index.html
   app.get('*', (req, res) => {
-    res.sendFile(path.join(staticPath, 'index.html'));
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 } else {
-  console.error('❌ ERROR: No frontend build folder found.');
-  console.log('Checked:', distPath);
-  console.log('Checked:', buildPath);
+  // Graceful handling for local development vs production
+  if (process.env.NODE_ENV === 'production') {
+    console.error('❌ ERROR: No frontend build folder found at:', distPath);
+  } else {
+    console.log('ℹ️ Local Dev: API active. Frontend handled by Vite on port 3000.');
+  }
 }
 
 // Error handling middleware
