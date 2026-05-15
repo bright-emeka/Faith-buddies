@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "cli": "^1.0.1",
-    "firebase": "^12.12.1",
+    "firebase": "^12.13.0",
     "render": "^0.1.4"
   }
 }
