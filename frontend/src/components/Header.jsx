@@ -41,23 +41,32 @@ const Header = ({ userId, onUserClick }) => {
             <span>Chat</span>
           </button>
 
-          <button
-            type="button"
-            className={`nav-item ${isActive('/notifications') ? 'active' : ''}`}
-            onClick={() => navigate('/notifications')}
-          >
-            <span className="icon">🔔</span>
-            <span>Notifications</span>
-          </button>
+      <button
+        type="button"
+        className={`nav-item ${isActive('/notifications') ? 'active' : ''}`}
+        onClick={() => navigate('/notifications')}
+      >
+        <span className="icon">🔔</span>
+        <span>Notifications</span>
+      </button>
 
-          <button
-            type="button"
-            className={`nav-item ${isActive('/profile') ? 'active' : ''}`}
-            onClick={() => onUserClick(userId)}
-          >
-            <span className="icon">👤</span>
-            <span>Profile</span>
-          </button>
+      <button
+        type="button"
+        className={`nav-item ${isActive('/search') ? 'active' : ''}`}
+        onClick={() => navigate('/search')}
+      >
+        <span className="icon">🔍</span>
+        <span>Search</span>
+      </button>
+
+      <button
+        type="button"
+        className={`nav-item ${isActive('/profile') ? 'active' : ''}`}
+        onClick={() => onUserClick(userId)}
+      >
+        <span className="icon">👤</span>
+        <span>Profile</span>
+      </button>
         </div>
       </div>
     </header>
