@@ -109,7 +109,7 @@ Remember: Your foundation is universal spiritual wisdom. Always encourage sincer
   return prompts[religion] || prompts['Other'];
 };
 
-// Send message to OpenAI and save to Firestore
+// Send message to Gemini and save to Firestore
 router.post('/message', verifyToken, async (req, res) => {
   try {
     const { message, userId } = req.body;
@@ -137,45 +137,55 @@ router.post('/message', verifyToken, async (req, res) => {
     const userDoc = await db.collection('users').doc(userId).get();
     const userReligion = userDoc.exists ? userDoc.data().religion || 'Christian' : 'Christian';
 
-    // Format messages for OpenAI API
-    const formattedMessages = [
-      { role: 'system', content: getSystemPrompt(userReligion) },
-      ...chatMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      { role: 'user', content: message },
-    ];
+    // Build conversation history for Gemini API
+    const conversationHistory = chatMessages.map((msg) => ({
+      role: msg.role === 'assistant' ? 'model' : msg.role,
+      parts: [{ text: msg.content }],
+    }));
 
-    // Validate OpenAI API key exists
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('❌ OPENAI_API_KEY is not set in environment variables');
+    // Validate Gemini API key exists
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('❌ GEMINI_API_KEY is not set in environment variables');
       return res.status(500).json({ 
-        error: 'OpenAI API key not configured. Please check server environment variables.' 
+        error: 'Gemini API key not configured. Please check server environment variables.' 
       });
     }
 
-    // Call OpenAI Chat Completion API with timeout
-    console.log('📡 Sending request to OpenAI API...');
+    // Call Gemini API with timeout
+    console.log('📡 Sending request to Gemini API...');
     const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
-        model: 'gpt-3.5-turbo',
-        messages: formattedMessages,
-        temperature: 0.7,
-        max_tokens: 1000,
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: getSystemPrompt(userReligion) }],
+          },
+          {
+            role: 'model',
+            parts: [{ text: 'I understand. I will follow these instructions.' }],
+          },
+          ...conversationHistory,
+          {
+            role: 'user',
+            parts: [{ text: message }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+        },
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         timeout: 30000, // 30 second timeout
       }
     );
 
-    console.log('✅ Received response from OpenAI');
-    const aiMessage = response.data.choices[0].message.content;
+    console.log('✅ Received response from Gemini');
+    const aiMessage = response.data.candidates[0].content.parts[0].text;
 
     // Save messages to Firestore
     const userMessageDoc = {
@@ -218,13 +228,13 @@ router.post('/message', verifyToken, async (req, res) => {
     }
 
     if (error.response?.status === 401) {
-      console.error('🔑 Authentication failed - Invalid OpenAI API key');
-      return res.status(401).json({ error: 'OpenAI API key is invalid or expired' });
+      console.error('🔑 Authentication failed - Invalid Gemini API key');
+      return res.status(401).json({ error: 'Gemini API key is invalid or expired' });
     }
 
     if (error.response?.status === 429) {
-      console.error('⏱️  Rate limited by OpenAI');
-      return res.status(429).json({ error: 'OpenAI API rate limit exceeded. Please try again later.' });
+      console.error('⏱️  Rate limited by Gemini');
+      return res.status(429).json({ error: 'Gemini API rate limit exceeded. Please try again later.' });
     }
 
     res.status(500).json({
