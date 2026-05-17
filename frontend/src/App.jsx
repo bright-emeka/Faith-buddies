@@ -10,6 +10,7 @@ import Profile from './pages/Profile.jsx';
 import Discover from './pages/Discover.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Search from './pages/Search.jsx';
+import Groups from './pages/Groups.jsx';
 import Header from './components/Header.jsx';
 import ChatHub from './pages/ChatHub.jsx';
 
@@ -76,6 +77,7 @@ function AppContent() {
                 <Route path="/chat" element={<ChatHub userEmail={user.email} />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/search" element={<Search />} />
+                <Route path="/groups" element={<Groups />} />
                 <Route path="/profile/:userId" element={<Profile />} />
                 <Route path="/discover" element={<Discover onUserClick={handleUserClick} />} />
                 <Route path="/" element={<Feed />} />

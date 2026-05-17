@@ -1,7 +1,7 @@
 ## Tasks to be added to the app production
 
 - [x] **1.** Add post Btn
-- [ ] **2.** Button to upload and change the profile picture rather than avatar URL
+- [x] **2.** Button to upload and change the profile picture rather than avatar URL
 - [x] **3.** Use Gemini as the AI chat buddy instead of OpenAI
 - [ ] **4.** A navbar for groups
 - [ ] **5.** A view profile when avatar of users is clicked

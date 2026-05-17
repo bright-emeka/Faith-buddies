@@ -61,6 +61,15 @@ const Header = ({ userId, onUserClick }) => {
 
       <button
         type="button"
+        className={`nav-item ${isActive('/groups') ? 'active' : ''}`}
+        onClick={() => navigate('/groups')}
+      >
+        <span className="icon">👥</span>
+        <span>Groups</span>
+      </button>
+
+      <button
+        type="button"
         className={`nav-item ${isActive('/profile') ? 'active' : ''}`}
         onClick={() => onUserClick(userId)}
       >
