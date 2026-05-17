@@ -29,6 +29,8 @@ const Profile = () => {
   const [postContent, setPostContent] = useState('');
   const [postImage, setPostImage] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [avatarImage, setAvatarImage] = useState('');
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   
   // Track authenticated user state properly
   const [currentUser, setCurrentUser] = useState(auth.currentUser);
@@ -116,44 +118,64 @@ const Profile = () => {
     setIsEditing(true);
   };
 
-   const handleSaveEdit = async () => {
-     try {
-       await updateUserProfile(userId, editForm);
-       setUser(prev => ({ ...prev, ...editForm }));
-       setIsEditing(false);
-     } catch (error) {
-       console.error('Error updating profile:', error);
-     }
-   };
+  const handleSaveEdit = async () => {
+    try {
+      await updateUserProfile(userId, editForm);
+      setUser(prev => ({ ...prev, ...editForm }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
 
-   const handleCreatePost = async () => {
-     if (!postContent.trim()) {
-       alert('Please enter some content for your post');
-       return;
-     }
+  const handleCreatePost = async () => {
+    if (!postContent.trim()) {
+      alert('Please enter some content for your post');
+      return;
+    }
 
-     setIsPosting(true);
-     try {
-       const newPost = await createPost(postContent, postImage || null);
-       setPosts([newPost, ...posts]);
-       setPostContent('');
-       setPostImage('');
-       setCreatePostModal(false);
-     } catch (error) {
-       console.error('Error creating post:', error);
-       alert('Failed to create post. Please try again.');
-     } finally {
-       setIsPosting(false);
-     }
-   };
+    setIsPosting(true);
+    try {
+      const newPost = await createPost(postContent, postImage || null);
+      setPosts([newPost, ...posts]);
+      setPostContent('');
+      setPostImage('');
+      setCreatePostModal(false);
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post. Please try again.');
+    } finally {
+      setIsPosting(false);
+    }
+  };
 
-   const handleImageChange = (e) => {
-     if (e.target.files && e.target.files[0]) {
-       // For now, we'll just use the file path as a simple image URL
-       // In a real app, you'd upload to Firebase Storage or similar
-       setPostImage(URL.createObjectURL(e.target.files[0]));
-     }
-   };
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setPostImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setIsUploadingAvatar(true);
+      try {
+        const avatarUrl = URL.createObjectURL(e.target.files[0]);
+        setAvatarImage(avatarUrl);
+        
+        // Update the user's avatar in the database
+        await updateUserProfile(userId, { avatar: avatarUrl });
+        setUser(prev => ({ ...prev, avatar: avatarUrl }));
+        
+        // Clear the file input
+        e.target.value = '';
+      } catch (error) {
+        console.error('Error updating avatar:', error);
+        alert('Failed to update avatar. Please try again.');
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -177,11 +199,26 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <img 
-          src={user.avatar || 'https://via.placeholder.com/150'} 
-          alt={user.name} 
-          className="profile-avatar" 
-        />
+        <div className="avatar-container">
+          <img 
+            src={user.avatar || 'https://via.placeholder.com/150'} 
+            alt={user.name} 
+            className="profile-avatar" 
+          />
+          {isOwnProfile && (
+            <label className="avatar-upload-label" onClick={() => document.getElementById('avatar-input').click()}>
+              {/* FIXED: The input tag below is now properly self-closed with '/>' */}
+              <input
+                type="file"
+                id="avatar-input"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
+              <div className="avatar-upload-icon">+</div>
+            </label>
+          )}
+        </div>
         <div className="profile-info">
           {isEditing ? (
             <div className="edit-form">
@@ -282,72 +319,72 @@ const Profile = () => {
       </div>
 
       <div className="profile-content">
-       {activeTab === 'posts' && (
-         <div className="posts-list">
-           {posts.length === 0 ? (
-             <div className="empty-posts-state">
-               <p>No posts yet</p>
-               {isOwnProfile && (
-                 <button 
-                   className="add-post-btn" 
-                   onClick={() => setCreatePostModal(true)}
-                 >
-                   +
-                 </button>
-               )}
-             </div>
-           ) : posts.map((post) => <Post key={post.id} post={post} />)}
-         </div>
-       )}
-       
-       {/* Create Post Modal */}
-       {createPostModal && (
-         <div className="modal-backdrop" onClick={() => setCreatePostModal(false)}>
-           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-             <div className="modal-header">
-               <h3>Create New Post</h3>
-               <button className="modal-close-btn" onClick={() => setCreatePostModal(false)}>
-                 &times;
-               </button>
-             </div>
-             <div className="modal-body">
-               <textarea
-                 value={postContent}
-                 onChange={(e) => setPostContent(e.target.value)}
-                 placeholder="What's on your mind?"
-                 maxLength="500"
-               />
-               <div className="modal-image-upload">
-                 <input
-                   type="file"
-                   accept="image/*"
-                   onChange={handleImageChange}
-                 />
-                 <label>Add Image (optional)</label>
-               </div>
-             </div>
-             <div className="modal-footer">
-               <button 
-                 className="modal-cancel-btn" 
-                 onClick={() => {
-                   setPostContent('');
-                   setPostImage('');
-                   setCreatePostModal(false);
-                 }}
-               >
-                 Cancel
-               </button>
-               <button 
-                 className="modal-post-btn"
-                 onClick={handleCreatePost}
-                 disabled={isPosting || !postContent.trim()}
-               >
-                 {isPosting ? 'Posting...' : 'Post'}
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
+        {activeTab === 'posts' && (
+          <div className="posts-list">
+            {posts.length === 0 ? (
+              <div className="empty-posts-state">
+                <p>No posts yet</p>
+                {isOwnProfile && (
+                  <button 
+                    className="add-post-btn" 
+                    onClick={() => setCreatePostModal(true)}
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            ) : posts.map((post) => <Post key={post.id} post={post} />)}
+          </div>
+        )}
+        
+        {/* Create Post Modal */}
+        {createPostModal && (
+          <div className="modal-backdrop" onClick={() => setCreatePostModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Create New Post</h3>
+                <button className="modal-close-btn" onClick={() => setCreatePostModal(false)}>
+                  &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  placeholder="What's on your mind?"
+                  maxLength="500"
+                />
+                <div className="modal-image-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                  <label>Add Image (optional)</label>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  className="modal-cancel-btn" 
+                  onClick={() => {
+                    setPostContent('');
+                    setPostImage('');
+                    setCreatePostModal(false);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="modal-post-btn"
+                  onClick={handleCreatePost}
+                  disabled={isPosting || !postContent.trim()}
+                >
+                  {isPosting ? 'Posting...' : 'Post'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'followers' && (
           <div className="users-grid">
