@@ -1,6 +1,39 @@
 // Groups page - displays groups the user is part of and allows creating new groups
 import React, { useState, useEffect } from 'react';
 
+// FIX: Moved mock data outside the component to prevent reallocation on every render 
+// and resolve the VS Code / ESLint dependency warning.
+const MOCK_GROUPS = [
+  {
+    id: 1,
+    name: 'Faith Buddies Youth Group',
+    description: 'A group for young adults to grow in faith together',
+    memberCount: 45,
+    image: 'https://via.placeholder.com/100'
+  },
+  {
+    id: 2,
+    name: 'Prayer Warriors',
+    description: 'Dedicated to intercessory prayer and spiritual warfare',
+    memberCount: 23,
+    image: 'https://via.placeholder.com/100'
+  },
+  {
+    id: 3,
+    name: 'Bible Study Fellowship',
+    description: 'Weekly deep dives into Gods word',
+    memberCount: 32,
+    image: 'https://via.placeholder.com/100'
+  },
+  {
+    id: 4,
+    name: 'Worship Team',
+    description: 'Musicians and singers leading worship',
+    memberCount: 12,
+    image: 'https://via.placeholder.com/100'
+  }
+];
+
 const Groups = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,44 +42,11 @@ const Groups = () => {
   const [groupDescription, setGroupDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  // Mock data for demonstration - in a real app, this would come from API endpoints
-  const mockGroups = [
-    {
-      id: 1,
-      name: 'Faith Buddies Youth Group',
-      description: 'A group for young adults to grow in faith together',
-      memberCount: 45,
-      image: 'https://via.placeholder.com/100'
-    },
-    {
-      id: 2,
-      name: 'Prayer Warriors',
-      description: 'Dedicated to intercessory prayer and spiritual warfare',
-      memberCount: 23,
-      image: 'https://via.placeholder.com/100'
-    },
-    {
-      id: 3,
-      name: 'Bible Study Fellowship',
-      description: 'Weekly deep dives into Gods word',
-      memberCount: 32,
-      image: 'https://via.placeholder.com/100'
-    },
-    {
-      id: 4,
-      name: 'Worship Team',
-      description: 'Musicians and singers leading worship',
-      memberCount: 12,
-      image: 'https://via.placeholder.com/100'
-    }
-  ];
-
   useEffect(() => {
     // In a real app, we would fetch groups from the API
-    // For now, we'll use mock data
-    setGroups(mockGroups);
+    setGroups(MOCK_GROUPS);
     setLoading(false);
-  }, []);
+  }, []); // [] is now completely valid since MOCK_GROUPS is in global scope
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
@@ -57,7 +57,6 @@ const Groups = () => {
     setIsCreating(true);
     try {
       // In a real app, we would call an API to create the group
-      // For now, we'll simulate the creation
       const newGroup = {
         id: Date.now(), // Temporary ID
         name: groupName,
